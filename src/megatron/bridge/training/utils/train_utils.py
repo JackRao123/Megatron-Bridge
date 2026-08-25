@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 import torch
 import torch.nn as nn
 from megatron.core.num_microbatches_calculator import get_num_microbatches
+from megatron.core.ssm.mamba_hybrid_layer_allocation import Symbols
 from megatron.core.tensor_parallel import param_is_not_tensor_parallel_duplicate
 from megatron.core.transformer.module import MegatronModule
 from megatron.core.transformer.moe.moe_utils import track_moe_metrics
@@ -986,8 +987,14 @@ def training_log(
         if getattr(config.model, "moe_z_loss_coeff", None) is not None:
             track_names.append("z_loss")
 
+        mtp_num_layers = getattr(config.model, "mtp_num_layers", None)
         if getattr(config.model, "is_hybrid_model", False):
-            layers = getattr(config.model, "hybrid_layer_pattern", "").count("E")
+            # MCore expects main and MTP MoE layer counts separately.
+            pattern = getattr(config.model, "hybrid_layer_pattern", "")
+            main_pattern, mtp_separator, mtp_patterns = pattern.partition(Symbols.MTP_SEPARATOR)
+            layers = main_pattern.count(Symbols.MOE)
+            if mtp_separator:
+                mtp_num_layers = mtp_patterns.count(Symbols.MOE)
         else:
             layers = getattr(config.model, "num_layers", None)
 
@@ -1005,7 +1012,7 @@ def training_log(
             track_names=track_names,
             num_layers=layers,
             moe_layer_freq=getattr(config.model, "moe_layer_freq", None),
-            mtp_num_layers=getattr(config.model, "mtp_num_layers", None),
+            mtp_num_layers=mtp_num_layers,
             pg_collection=pg_collection,
         )
     if getattr(config.model, "mtp_num_layers", None) is not None:

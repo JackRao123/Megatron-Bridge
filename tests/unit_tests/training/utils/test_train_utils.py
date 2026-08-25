@@ -1031,8 +1031,10 @@ class TestTrainingLog:
         mock_config.model.moe_z_loss_coeff = 0.1
         mock_config.model.moe_per_layer_logging = True
         mock_config.model.num_layers = 12
-        mock_config.model.moe_layer_freq = 2
-        mock_config.model.mtp_num_layers = None
+        mock_config.model.moe_layer_freq = None
+        mock_config.model.mtp_num_layers = 2
+        mock_config.model.is_hybrid_model = True
+        mock_config.model.hybrid_layer_pattern = "MEMEM*EMEMEM*EMEMEM*EMEMEM*EMEMEM*EMEMEMEM*EMEMEMEME/*E/*E"
 
         training_log(
             loss_dict=loss_dict,
@@ -1056,6 +1058,8 @@ class TestTrainingLog:
         call_args = mock_track_moe.call_args
         assert "load_balancing_loss" in call_args.kwargs["track_names"]
         assert "z_loss" in call_args.kwargs["track_names"]
+        assert call_args.kwargs["num_layers"] == 23
+        assert call_args.kwargs["mtp_num_layers"] == 2
 
     @mock.patch("megatron.bridge.training.utils.train_utils.get_num_microbatches")
     @mock.patch("megatron.bridge.training.utils.train_utils.reduce_max_stat_across_model_parallel_group")
