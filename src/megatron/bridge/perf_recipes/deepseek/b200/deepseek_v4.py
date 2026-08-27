@@ -25,9 +25,10 @@ from megatron.bridge.training.config import ConfigContainer
 
 def _apply_deepseek_v4_b200_overrides(cfg: ConfigContainer) -> None:
     """Apply the lower-memory B200 topology and communication settings."""
-    cfg.model.pipeline_model_parallel_size = 8
+    cfg.model.pipeline_model_parallel_size = 4
     cfg.model.virtual_pipeline_model_parallel_size = None
     cfg.model.expert_model_parallel_size = 8
+    cfg.train.micro_batch_size = 1
     set_deepseek_v4_pipeline_model_parallel_layout(cfg.model)
     cfg.model.cuda_graph_impl = "transformer_engine"
     cfg.model.cuda_graph_scope = ["attn", "moe_router", "moe_preprocess"]
@@ -40,8 +41,10 @@ def _apply_deepseek_v4_b200_overrides(cfg: ConfigContainer) -> None:
     cfg.model.recompute_modules = recompute_modules
 
     cfg.comm_overlap.overlap_grad_reduce = True
-    cfg.comm_overlap.delay_wgrad_compute = True
-    cfg.comm_overlap.overlap_moe_expert_parallel_comm = True
+    # Hash-routed MoE layers do not currently support EP A2A overlap.
+    cfg.comm_overlap.delay_wgrad_compute = False
+    cfg.dist.distributed_timeout_minutes = 30
+    cfg.comm_overlap.overlap_moe_expert_parallel_comm = False
 
 
 def deepseek_v4_flash_pretrain_128gpu_b200_fp8mx_config() -> ConfigContainer:
@@ -60,6 +63,7 @@ def deepseek_v4_flash_pretrain_128gpu_b200_fp8mx_config() -> ConfigContainer:
         "NVLINK_DOMAIN_SIZE": 8,
         "USE_MNNVL": 0,
         "NVTE_BWD_LAYERNORM_SM_MARGIN": 20,
+        "NVTE_CUTEDSL_FUSED_GROUPED_MLP": 1,
         "NVTE_FWD_LAYERNORM_SM_MARGIN": 20,
         "NVTE_ALLOW_NONDETERMINISTIC_ALGO": 0,
     }

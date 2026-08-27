@@ -32,6 +32,7 @@ def _apply_deepseek_v4_b300_overrides(cfg: ConfigContainer) -> None:
     cfg.model.expert_model_parallel_size = 8
     cfg.model.expert_tensor_parallel_size = 1
     cfg.model.sequence_parallel = False
+    cfg.train.micro_batch_size = 2
     cfg.model.moe_hybridep_num_sms_preprocessing = 32
     cfg.model.moe_paged_stash_buffer_size_factor_cuda = 1.5
     set_deepseek_v4_pipeline_model_parallel_layout(cfg.model)
