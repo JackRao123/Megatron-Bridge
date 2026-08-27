@@ -134,7 +134,7 @@ def test_deepseek_v4_flash_128gpu_b300_fp8mx_config() -> None:
 
     assert cfg.model.tensor_model_parallel_size == 1
     assert cfg.model.pipeline_model_parallel_size == 4
-    assert cfg.model.virtual_pipeline_model_parallel_size == 4
+    assert cfg.model.virtual_pipeline_model_parallel_size is None
     assert cfg.model.context_parallel_size == 1
     assert cfg.model.expert_model_parallel_size == 8
     assert cfg.model.expert_tensor_parallel_size == 1
@@ -155,7 +155,7 @@ def test_deepseek_v4_flash_128gpu_b200_fp8mx_config() -> None:
 
     assert cfg.model.tensor_model_parallel_size == 1
     assert cfg.model.pipeline_model_parallel_size == 8
-    assert cfg.model.virtual_pipeline_model_parallel_size == 2
+    assert cfg.model.virtual_pipeline_model_parallel_size is None
     assert cfg.model.context_parallel_size == 1
     assert cfg.model.expert_model_parallel_size == 8
     assert cfg.model.expert_tensor_parallel_size == 1

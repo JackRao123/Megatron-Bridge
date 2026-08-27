@@ -27,12 +27,13 @@ def _apply_deepseek_v4_b300_overrides(cfg: ConfigContainer) -> None:
     """Apply a B300 topology scaled down from the larger DeepSeek V3 model."""
     cfg.model.tensor_model_parallel_size = 1
     cfg.model.pipeline_model_parallel_size = 4
-    cfg.model.virtual_pipeline_model_parallel_size = 4
+    cfg.model.virtual_pipeline_model_parallel_size = None
     cfg.model.context_parallel_size = 1
     cfg.model.expert_model_parallel_size = 8
     cfg.model.expert_tensor_parallel_size = 1
     cfg.model.sequence_parallel = False
     cfg.model.moe_hybridep_num_sms_preprocessing = 32
+    cfg.model.moe_paged_stash_buffer_size_factor_cuda = 1.5
     set_deepseek_v4_pipeline_model_parallel_layout(cfg.model)
 
 

@@ -26,7 +26,7 @@ from megatron.bridge.training.config import ConfigContainer
 def _apply_deepseek_v4_b200_overrides(cfg: ConfigContainer) -> None:
     """Apply the lower-memory B200 topology and communication settings."""
     cfg.model.pipeline_model_parallel_size = 8
-    cfg.model.virtual_pipeline_model_parallel_size = 2
+    cfg.model.virtual_pipeline_model_parallel_size = None
     cfg.model.expert_model_parallel_size = 8
     set_deepseek_v4_pipeline_model_parallel_layout(cfg.model)
     cfg.model.cuda_graph_impl = "transformer_engine"
